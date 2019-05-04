@@ -2,13 +2,12 @@ import requests, re, time, sys, os
 from Crypto.Cipher import AES
 
 # 待优化：分两次匹配了视频和key的url
-# bug：爬取pm视频时总会卡住，暂时不清楚原因
 
 class Tarena_spider(object):
     def __init__(self):
         # 根据爬取需求进行修改
-        self.course_no = 'aid18100325'
-        self.menuId = '646588'
+        self.course_no = 'aid18100401'
+        self.menuId = '646585'
         self.version = 'AIDTN201809'
 
         self.url_am = 'http://videotts.it211.com.cn/' + self.course_no + 'am/' + self.course_no + 'am.m3u8'
@@ -48,13 +47,17 @@ class Tarena_spider(object):
 
         # 循环下载ts链接
         count = 0
+        cryptor = AES.new(key, AES.MODE_CBC, key)
         for link in ts_list:
             res = requests.get(url=link,headers=self.headers)
-            cryptor = AES.new(key, AES.MODE_CBC, key)
             filename = self.download_path + '/' + '%03d'%count + '.mp4'
             with open(filename,'wb') as f:
-                f.write(cryptor.decrypt(res.content))
+                try:
+                    f.write(cryptor.decrypt(res.content))
+                except:
+                    pass
             count += 1
+            print('已爬完第%d个视频'%count)
             time.sleep(0.3)
         self.merge_file(index)
 
