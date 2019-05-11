@@ -2,32 +2,29 @@ import requests, re, time, sys, os
 from Crypto.Cipher import AES
 from multiprocessing import Queue
 from threading import Thread
+import datetime
 
 # 待优化：分两次匹配了视频和key的url
-# 效率太低，如何启用多线程或多进程呢？？？
-# 思路：一个线程爬链接，3个线程负责下载
-# 待完成：拼接cmd命令，重复下载线程
 
 class Tarena_spider(object):
     def __init__(self):
         # 根据爬取需求进行修改
-        # big18111130pm
         self.course_name = 'big'
-        self.course_date = 18111208
+        self.course_date = datetime.date(2018,11,23)
         self.course_num = 16
-        self.folder = os.getcwd() + '/java_basic'
         self.menuId = '632256'
         self.version = 'BIGTN201803'
-        
         self.headers = {
             'Origin': 'http://tts.tmooc.cn',
             # 'Referer': 'http://tts.tmooc.cn/video/showVideo?menuId=646590&version=AIDTN201809',
             'Referer': 'http://tts.tmooc.cn/video/showVideo?menuId=' + self.menuId + '&version=' + self.version,
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
                 }
+
         self.root = os.getcwd()
+        self.folder = self.root + '/java_basic'
         self.down_list = Queue()
-        self.tlist = []
+        self.tlist = []    # 存放线程的列表
 
     # 创建线程爬取url和下载
     def run(self):
@@ -35,7 +32,7 @@ class Tarena_spider(object):
         th1.start()
         self.tlist.append(th1)
         # 多线程下载
-        for i in range(3):
+        for i in range(5):
             th = Thread(target=self.download,args=(i,))
             th.start()
             self.tlist.append(th)
@@ -46,12 +43,12 @@ class Tarena_spider(object):
 
 
     def get_url(self):
-        success_count = 0
+        success_count = 0    # 记录url爬取次数，与course_num对应
         i = 0
         while success_count < self.course_num:
             print('开始爬取第%d天url'%(success_count+1))
-            self.course_date += i
-            course_no = self.course_name + str(self.course_date)
+            self.course_date += datetime.timedelta(days=i)
+            course_no = self.course_name + self.course_date.strftime("%Y%m%d")
             url_am = 'http://videotts.it211.com.cn/' + course_no + 'am/' + course_no + 'am.m3u8'
             url_pm = 'http://videotts.it211.com.cn/' + course_no + 'pm/' + course_no + 'pm.m3u8'
             urls = [url_am, url_pm]
@@ -59,7 +56,9 @@ class Tarena_spider(object):
             for index,url in enumerate(urls):
                 res = requests.get(url=url,headers=self.headers,timeout=1)
                 if res.status_code == 200:
+                    # 响应成功，转去处理页面信息，解析key和ts的链接
                     self.handle(res,index,course_no)
+                # 若响应失败了，则可能无此url，跳出for循环进行下一次请求
                 elif res.status_code == 404:
                     print('404了')
                     i = 1
@@ -76,17 +75,16 @@ class Tarena_spider(object):
         print('----------url爬取线程结束')
 
 
+    # 解析页面，获取key和ts视频的链接
     def handle(self,res,index,course_no):
         res.encoding = 'utf-8'
         html = res.text
         # 匹配ts文件地址
-        p_url = re.compile(r'http://.*?\.ts')
-        ts_list = p_url.findall(html)
-        for url in ts_list:
-            self.down_list.put(url)
+        regex_url = re.compile(r'http://.*?\.ts')
+        ts_list = regex_url.findall(html)
         # 匹配密钥
-        p_key = re.compile(r'http://.*?\.key')
-        key_url = p_key.findall(html)[0]
+        regex_key = re.compile(r'http://.*?\.key')
+        key_url = regex_key.findall(html)[0]
         key_res = requests.get(url=key_url,headers=self.headers)
         # 返回二进制对象
         key = key_res.content
