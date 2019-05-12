@@ -12,11 +12,11 @@ import datetime
 class Tarena_spider(object):
     def __init__(self):
         # 根据爬取需求进行修改
-        self.course_name = 'aid1810'
-        self.course_date = datetime.date(2019,2,26)
-        self.course_num = 8
-        self.menuId = '636595'
-        self.version = 'AIDTN201809'
+        self.course_name = 'wfd1811a'
+        self.course_date = datetime.date(2019,3,5)
+        self.course_num = 6
+        self.menuId = '643814'
+        self.version = 'WEBTN201805'
         self.headers = {
             'Origin': 'http://tts.tmooc.cn',
             # 'Referer': 'http://tts.tmooc.cn/video/showVideo?menuId=646590&version=AIDTN201809',
@@ -25,7 +25,7 @@ class Tarena_spider(object):
                 }
 
         self.root = os.getcwd()
-        self.folder = self.root + '/spider'
+        self.folder = self.root + '/VUEECOSYSTEM'
         self.down_list = Queue()
         self.tlist = []    # 存放线程的列表
 
