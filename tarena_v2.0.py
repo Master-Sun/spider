@@ -6,7 +6,8 @@ from Crypto.Cipher import AES
 class Tarena_spider(object):
     def __init__(self):
         # 根据爬取需求进行修改
-        self.course_no = 'aid18100401'
+        # http://videotts.it211.com.cn/big18110424pm/big18110424pm.m3u8
+        self.course_no = 'big18110424'
         self.menuId = '646585'
         self.version = 'AIDTN201809'
 

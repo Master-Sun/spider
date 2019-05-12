@@ -1,9 +1,9 @@
 import requests, re, time, sys, os, shutil
 from Crypto.Cipher import AES
 
-url = 'http://videotts.it211.com.cn/aid18100313am/aid18100313am.m3u8'
+url = 'http://videotts.it211.com.cn/big18110427pm/big18110427pm.m3u8'
 # url = 'http://videotts.it211.com.cn/aid18100315am/aid18100315am-6.ts'
-course_name = 'pandas_day09'
+course_name = 'big18110427pm'
 root = os.getcwd()
 
 headers = {
@@ -38,7 +38,7 @@ for link in rList:
             pass
     count += 1
     print('已爬完第%d个视频'%count)
-    time.sleep(0.3)
+    time.sleep(0.1)
 
 
 os.chdir(root + '/cache')
